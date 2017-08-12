@@ -36,3 +36,15 @@ The CLI accepts arguments to specify the paths of (1) input file, and (1) output
 ```
 python cli.py --input="./input.csv" --output="./output.csv"
 ```
+
+### Input format
+
+The input file should be a CSV with the following format:
+
+```
+ticker,event_date,filing_type,search_term
+AAPL,20140228,8-K,5.07|items 5
+```
+
+Note the `search_term` column: this column accepts a pipe-delimited list of strings that the scraper will attempt to match a filings description against. If the term cannot be found as a string, the program will retry it as a *regular expression*. This allows you to do really powerful and flexible pattern matching against the search results.
+
