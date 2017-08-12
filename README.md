@@ -48,3 +48,7 @@ AAPL,20140228,8-K,5.07|items 5
 
 Note the `search_term` column: this column accepts a pipe-delimited list of strings that the scraper will attempt to match a filings description against. If the term cannot be found as a string, the program will retry it as a *regular expression*. This allows you to do really powerful and flexible pattern matching against the search results.
 
+## License
+
+MIT
+
