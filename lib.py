@@ -1,14 +1,60 @@
 import requests
 import re
+import csv
+import json
+import click
 from urlparse import urljoin
 from urllib import urlencode
 from datetime import datetime, timedelta
-from utils import parse_date, clean_date, format_url
 from bs4 import BeautifulSoup
 
+# Output CSV headers
+HEADERS = [
+    'ticker',
+    'event_date',
+    'filing_type',
+    'search_term',
+    'filing_date',
+    'report_date',
+    'url'
+]
+DELIMITER = ','
 BASE_URL = 'https://www.sec.gov'
-SEARCH_URL = format_url('/cgi-bin/browse-edgar')
+SEARCH_URL = BASE_URL + '/cgi-bin/browse-edgar'
 RANGE = 10
+
+@click.command()
+@click.option('--input', help='Path to CSV search input file', required=True)
+@click.option('--output', help='Path to CSV output file', required=True)
+
+def main(input, output):
+    with open(input, 'rb') as infile, open(output, 'wb') as outfile:
+        writer = csv.writer(outfile, delimiter = DELIMITER)
+        reader = csv.reader(infile, delimiter = DELIMITER)
+
+        reader.next() # skip the old headers
+        writer.writerow(HEADERS) # write the new headers
+
+        for row in reader:
+            writer.writerow(process_row(row))
+
+def process_row(row):
+    ticker = row[0]
+    event_date = row[1]
+    filing_type = row[2]
+    search_terms = row[3].split('|')
+
+    result = find_filing(ticker, event_date, filing_type, search_terms)
+
+    return [
+        ticker,
+        event_date,
+        filing_type,
+        [term.encode('utf8') for term in search_terms],
+        result.get('filing_date'),
+        result.get('report_date'),
+        result.get('url')
+    ]
 
 def find_filing(ticker, event_date, type, search_terms):
     filing_url = None
@@ -103,3 +149,6 @@ def clean_date(str):
 
 def parse_date(datestring):
     return datetime.strptime(datestring, '%Y%m%d')
+
+if __name__ == '__main__':
+    main()
