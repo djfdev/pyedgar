@@ -1,8 +1,11 @@
 import requests
 import re
+import sys
 import csv
 import json
 import click
+import time
+
 from urlparse import urljoin
 from urllib import urlencode
 from datetime import datetime, timedelta
@@ -22,6 +25,8 @@ DELIMITER = ','
 BASE_URL = 'https://www.sec.gov'
 SEARCH_URL = BASE_URL + '/cgi-bin/browse-edgar'
 RANGE = 10
+RATE_LIMIT = 1
+TICKER_SYMBOL = '.'
 
 @click.command()
 @click.option('--input', help='Path to CSV search input file', required=True)
@@ -37,6 +42,9 @@ def main(input, output):
 
         for row in reader:
             writer.writerow(process_row(row))
+            sys.stdout.write(TICKER_SYMBOL)
+            sys.stdout.flush()
+            time.sleep(RATE_LIMIT)
 
 def process_row(row):
     ticker = row[0]
